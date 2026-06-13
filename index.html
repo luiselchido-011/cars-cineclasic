@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cars — Recomendación de Película</title>
+
+<!-- ─── IMÁGENES: cargadas desde imagenes.js ─── -->
+<script src="imagenes.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --asphalt: #0E0E10;
+    --asphalt-mid: #1A1A1E;
+    --asphalt-light: #26262C;
+    --red: #D42B2B;
+    --red-bright: #FF3A3A;
+    --yellow: #F5C842;
+    --yellow-dim: #C9A030;
+    --white: #F2F0EB;
+    --muted: #888890;
+    --line: rgba(255,255,255,0.07);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--asphalt);
+    color: var(--white);
+    overflow-x: hidden;
+  }
+
+  .track-line {
+    height: 3px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--yellow) 0px, var(--yellow) 40px,
+      transparent 40px, transparent 70px
+    );
+    opacity: 0.6;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 18px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(14,14,16,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--line);
+    transition: padding 0.3s, background 0.3s;
+  }
+
+  nav.scrolled {
+    padding: 12px 60px;
+    background: rgba(14,14,16,0.95);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 3px;
+    color: var(--yellow);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  .nav-logo:hover { color: var(--white); }
+
+  .nav-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .nav-links { display: flex; gap: 32px; }
+
+  .nav-links a {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+    position: relative;
+  }
+
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px; left: 0;
+    width: 0; height: 1px;
+    background: var(--yellow);
+    transition: width 0.3s;
+  }
+  .nav-links a:hover { color: var(--white); }
+  .nav-links a:hover::after { width: 100%; }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    position: relative;
+    overflow: hidden;
+    padding-top: 60px;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(-15deg, transparent 0px, transparent 60px,
+        rgba(255,255,255,0.012) 60px, rgba(255,255,255,0.012) 61px),
+      radial-gradient(ellipse at 70% 40%, rgba(212,43,43,0.18) 0%, transparent 55%),
+      radial-gradient(ellipse at 20% 80%, rgba(245,200,66,0.08) 0%, transparent 40%),
+      var(--asphalt);
+    pointer-events: none;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(245,200,66,0.15) 0px, transparent 2px),
+      radial-gradient(circle at 80% 20%, rgba(212,43,43,0.1)  0px, transparent 2px),
+      radial-gradient(circle at 40% 70%, rgba(255,255,255,0.08) 0px, transparent 1.5px),
+      radial-gradient(circle at 60% 50%, rgba(245,200,66,0.1)  0px, transparent 2px),
+      radial-gradient(circle at 10% 80%, rgba(212,43,43,0.08)  0px, transparent 1.5px);
+    background-size: 300px 300px;
+    animation: particles 20s linear infinite;
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  @keyframes particles {
+    0%   { background-position: 0 0; }
+    100% { background-position: 300px 300px; }
+  }
+
+  .hero-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    padding: 80px 60px 60px;
+    position: relative;
+    z-index: 2;
+    gap: 60px;
+  }
+
+  .hero-eyebrow { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+
+  .eyebrow-pill {
+    background: var(--red);
+    color: #fff;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 2px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(212,43,43,0.4); }
+    50%       { box-shadow: 0 0 0 8px rgba(212,43,43,0); }
+  }
+
+  .eyebrow-year {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(90px, 12vw, 160px);
+    line-height: 0.9;
+    letter-spacing: 2px;
+    color: var(--white);
+    margin-bottom: 8px;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeUp 0.8s ease forwards 0.3s;
+  }
+
+  .hero-title .stroke {
+    -webkit-text-stroke: 2px var(--red);
+    color: transparent;
+    transition: all 0.4s;
+  }
+  .hero-title:hover .stroke {
+    -webkit-text-stroke: 2px var(--yellow);
+    color: rgba(245,200,66,0.1);
+  }
+
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+  .hero-subtitle {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 36px;
+    font-weight: 400;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.8s ease forwards 0.5s;
+  }
+
+  .hero-desc {
+    font-size: 17px;
+    line-height: 1.75;
+    color: rgba(242,240,235,0.65);
+    font-weight: 300;
+    max-width: 460px;
+    margin-bottom: 44px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.8s ease forwards 0.7s;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.8s ease forwards 0.9s;
+  }
+
+  .btn-watch {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--red);
+    color: #fff;
+    padding: 15px 32px;
+    border-radius: 3px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-watch::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
+  .btn-watch:hover { background: var(--red-bright); transform: translateY(-2px); box-shadow: 0 10px 30px rgba(212,43,43,0.3); }
+  .btn-watch:hover::before { left: 100%; }
+
+  .btn-watch .play-icon {
+    width: 0; height: 0;
+    border-style: solid;
+    border-width: 5px 0 5px 9px;
+    border-color: transparent transparent transparent #fff;
+    flex-shrink: 0;
+  }
+
+  .btn-info {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+    padding-bottom: 3px;
+  }
+  .btn-info:hover { color: var(--white); border-color: var(--yellow); }
+
+  /* ─── POSTER ─── */
+  .hero-visual {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transform: translateX(40px);
+    animation: fadeLeft 1s ease forwards 0.6s;
+  }
+
+  @keyframes fadeLeft { to { opacity: 1; transform: translateX(0); } }
+
+  .poster-frame {
+    position: relative;
+    width: 340px;
+    transition: transform 0.4s ease;
+  }
+  .poster-frame:hover { transform: translateY(-8px) rotateY(-3deg); }
+
+  .poster-img {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    display: block;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06);
+    transition: box-shadow 0.4s;
+    object-fit: cover;
+  }
+  .poster-frame:hover .poster-img {
+    box-shadow: 0 50px 100px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.1), 0 0 40px rgba(212,43,43,0.15);
+  }
+
+  .rating-badge {
+    position: absolute;
+    top: -20px; right: -20px;
+    width: 80px; height: 80px;
+    background: var(--yellow);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(245,200,66,0.4);
+    animation: badgeFloat 3s ease-in-out infinite;
+  }
+
+  @keyframes badgeFloat {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-5px); }
+  }
+  .poster-frame:hover .rating-badge { transform: scale(1.1); box-shadow: 0 12px 30px rgba(245,200,66,0.5); }
+
+  .rating-num { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--asphalt); line-height: 1; }
+  .rating-label { font-size: 9px; letter-spacing: 1px; color: rgba(14,14,16,0.6); text-transform: uppercase; font-weight: 600; }
+
+  .poster-frame::before {
+    content: '';
+    position: absolute;
+    top: 12px; left: 12px; right: -12px; bottom: -12px;
+    border: 1px solid rgba(212,43,43,0.3);
+    border-radius: 4px;
+    z-index: -1;
+    transition: all 0.4s;
+  }
+  .poster-frame:hover::before { top: 16px; left: 16px; right: -16px; bottom: -16px; border-color: rgba(212,43,43,0.5); }
+
+  /* ─── META BAR ─── */
+  .meta-bar {
+    position: relative;
+    z-index: 2;
+    padding: 28px 60px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    gap: 48px;
+    align-items: center;
+    background: rgba(14,14,16,0.5);
+    backdrop-filter: blur(10px);
+  }
+
+  .meta-item { display: flex; flex-direction: column; gap: 4px; transition: transform 0.3s; }
+  .meta-item:hover { transform: translateY(-2px); }
+  .meta-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); }
+  .meta-value { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; letter-spacing: 1px; color: var(--white); font-weight: 600; }
+  .meta-sep { width: 1px; height: 36px; background: var(--line); }
+
+  /* ─── SINOPSIS ─── */
+  .synopsis {
+    padding: 100px 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+    background: var(--asphalt-mid);
+    border-top: 1px solid var(--line);
+  }
+
+  .section-eyebrow {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-eyebrow::before { content: ''; display: block; width: 24px; height: 2px; background: var(--red); }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(42px, 5vw, 64px);
+    line-height: 0.95;
+    letter-spacing: 1px;
+    margin-bottom: 28px;
+  }
+
+  .synopsis-text {
+    font-size: 16px;
+    line-height: 1.9;
+    color: rgba(242,240,235,0.7);
+    font-weight: 300;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease;
+  }
+  .synopsis-text.visible { opacity: 1; transform: translateY(0); }
+  .synopsis-text + .synopsis-text { margin-top: 20px; }
+
+  .quote-block {
+    border-left: 3px solid var(--yellow);
+    padding: 24px 28px;
+    background: rgba(245,200,66,0.05);
+    border-radius: 0 4px 4px 0;
+    margin-top: 40px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+  .quote-block::before {
+    content: '"';
+    position: absolute;
+    top: -10px; left: 10px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 80px;
+    color: rgba(245,200,66,0.1);
+    line-height: 1;
+  }
+  .quote-block:hover { background: rgba(245,200,66,0.08); transform: translateX(4px); }
+  .quote-text { font-family: 'Barlow', sans-serif; font-size: 18px; font-style: italic; color: var(--yellow); line-height: 1.6; font-weight: 300; }
+  .quote-attr { margin-top: 10px; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+
+  /* ─── FICHA TÉCNICA ─── */
+  .tech-sheet {
+    background: var(--asphalt-light);
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .tech-sheet:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+  .tech-header { background: var(--red); padding: 16px 28px; font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 3px; transition: background 0.3s; }
+  .tech-sheet:hover .tech-header { background: var(--red-bright); }
+  .tech-row { padding: 16px 28px; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 130px 1fr; gap: 16px; align-items: start; transition: background 0.2s; }
+  .tech-row:hover { background: rgba(255,255,255,0.02); }
+  .tech-row:last-child { border-bottom: none; }
+  .tech-key { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); padding-top: 2px; }
+  .tech-val { font-size: 14px; color: var(--white); font-weight: 400; line-height: 1.5; }
+
+  .genre-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .genre-pill {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 2px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 1px;
+    color: rgba(242,240,235,0.8);
+    transition: all 0.2s;
+    cursor: default;
+  }
+  .genre-pill:hover { background: rgba(212,43,43,0.15); border-color: rgba(212,43,43,0.4); color: var(--white); transform: translateY(-1px); }
+
+  /* ─── TRAILER ─── */
+  .trailer-section { padding: 100px 60px; background: var(--asphalt); border-top: 1px solid var(--line); }
+  .trailer-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 48px; }
+  .trailer-note { font-size: 14px; color: var(--muted); font-weight: 300; max-width: 300px; text-align: right; line-height: 1.6; }
+
+  .video-wrapper {
+    width: 100%;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+    transition: box-shadow 0.4s, transform 0.4s;
+    background: #000;
+  }
+  .video-wrapper:hover { box-shadow: 0 50px 100px rgba(0,0,0,0.7), 0 0 60px rgba(212,43,43,0.1); transform: translateY(-2px); }
+  .video-wrapper video { width: 100%; height: auto; display: block; max-height: 540px; }
+
+  .track-accent {
+    margin-top: 24px;
+    height: 2px;
+    background: repeating-linear-gradient(90deg, var(--red) 0px, var(--red) 30px, transparent 30px, transparent 50px);
+    opacity: 0.5;
+    animation: trackMove 2s linear infinite;
+  }
+  @keyframes trackMove { 0% { background-position: 0 0; } 100% { background-position: 80px 0; } }
+
+  /* ─── PERSONAJES ─── */
+  .characters { padding: 100px 60px; background: var(--asphalt-mid); border-top: 1px solid var(--line); }
+
+  .char-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    margin-top: 56px;
+    background: var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .char-card {
+    background: var(--asphalt-light);
+    transition: background 0.3s, transform 0.3s;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .char-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 3px;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s ease;
+    z-index: 2;
+  }
+  .char-card:nth-child(1)::after { background: var(--red); }
+  .char-card:nth-child(2)::after { background: var(--yellow); }
+  .char-card:nth-child(3)::after { background: #4A9EFF; }
+  .char-card:nth-child(4)::after { background: #50C878; }
+  .char-card:hover { background: #222228; transform: translateY(-4px); }
+  .char-card:hover::after { transform: scaleX(1); }
+
+  .char-img-wrap { width: 100%; aspect-ratio: 1 / 1; overflow: hidden; background: #fff; position: relative; }
+  .char-img-wrap img { width: 100%; height: 100%; object-fit: contain; object-position: center; padding: 8px; transition: transform 0.4s ease; display: block; }
+  .char-card:hover .char-img-wrap img { transform: scale(1.06); }
+
+  .char-body { padding: 24px 24px 28px; flex: 1; }
+  .char-name { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 1px; margin-bottom: 4px; }
+  .char-role { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .char-desc { font-size: 13px; color: rgba(242,240,235,0.55); line-height: 1.6; font-weight: 300; }
+
+  /* ─── RAZONES ─── */
+  .reasons {
+    padding: 100px 60px;
+    background: var(--asphalt);
+    border-top: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  .reason-list { display: flex; flex-direction: column; gap: 0; margin-top: 40px; }
+
+  .reason-item {
+    display: flex;
+    gap: 24px;
+    padding: 28px 0;
+    border-bottom: 1px solid var(--line);
+    align-items: flex-start;
+    transition: padding-left 0.3s, background 0.3s;
+    cursor: default;
+    border-radius: 0 4px 4px 0;
+  }
+  .reason-item:first-child { padding-top: 0; }
+  .reason-item:last-child { border-bottom: none; }
+  .reason-item:hover { padding-left: 8px; background: rgba(255,255,255,0.02); }
+
+  .reason-num { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--red); line-height: 1; flex-shrink: 0; width: 40px; opacity: 0.5; transition: opacity 0.3s, color 0.3s; }
+  .reason-item:hover .reason-num { opacity: 1; color: var(--yellow); }
+  .reason-title { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase; transition: color 0.3s; }
+  .reason-item:hover .reason-title { color: var(--yellow); }
+  .reason-text { font-size: 14px; color: rgba(242,240,235,0.55); line-height: 1.6; font-weight: 300; }
+
+  /* ─── PUNTUACIONES ─── */
+  .scores-block { background: var(--asphalt-light); border-radius: 6px; border: 1px solid var(--line); padding: 40px 36px; transition: transform 0.3s, box-shadow 0.3s; }
+  .scores-block:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+  .scores-title { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: var(--muted); margin-bottom: 32px; }
+  .score-row { margin-bottom: 28px; }
+  .score-row:last-child { margin-bottom: 0; }
+  .score-top { display: flex; justify-content: space-between; margin-bottom: 8px; }
+  .score-name { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; color: var(--white); font-weight: 600; }
+  .score-val { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--yellow); }
+  .score-bar-bg { height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+  .score-bar-fill { height: 100%; border-radius: 2px; background: var(--red); width: 0; transition: width 1.2s ease; }
+  .score-bar-fill.yellow { background: var(--yellow); }
+  .score-bar-fill.blue   { background: #4A9EFF; }
+  .scores-block:hover .score-bar-fill { filter: brightness(1.2); }
+
+  /* ─── CTA ─── */
+  .cta-section { padding: 100px 60px; background: var(--red); text-align: center; position: relative; overflow: hidden; transition: background 0.5s; }
+  .cta-section:hover { background: #c02020; }
+  .cta-section::before {
+    content: 'CARS';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 300px;
+    color: rgba(255,255,255,0.05);
+    letter-spacing: 10px;
+    line-height: 1;
+    white-space: nowrap;
+    pointer-events: none;
+    animation: ctaTextPulse 4s ease-in-out infinite;
+  }
+  @keyframes ctaTextPulse { 0%, 100% { opacity: 0.05; } 50% { opacity: 0.1; } }
+
+  .cta-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 5px; text-transform: uppercase; color: rgba(255,255,255,0.6); margin-bottom: 16px; position: relative; z-index: 2; }
+  .cta-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(48px, 7vw, 96px); letter-spacing: 2px; color: #fff; line-height: 1; margin-bottom: 24px; position: relative; z-index: 2; transition: transform 0.3s; }
+  .cta-section:hover .cta-title { transform: scale(1.02); }
+  .cta-sub { font-size: 16px; color: rgba(255,255,255,0.7); font-weight: 300; margin-bottom: 44px; position: relative; z-index: 2; }
+
+  .cta-btn {
+    display: inline-block;
+    background: var(--asphalt);
+    color: var(--yellow);
+    padding: 18px 48px;
+    border-radius: 3px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 4px;
+    text-decoration: none;
+    transition: all 0.25s;
+    position: relative;
+    z-index: 2;
+    overflow: hidden;
+  }
+  .cta-btn::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(245,200,66,0.15), transparent); transition: left 0.5s; }
+  .cta-btn:hover { background: #000; transform: translateY(-3px); box-shadow: 0 15px 40px rgba(0,0,0,0.4); }
+  .cta-btn:hover::before { left: 100%; }
+
+  /* ─── FOOTER ─── */
+  footer { background: var(--asphalt); border-top: 1px solid var(--line); padding: 28px 60px; display: flex; justify-content: space-between; align-items: center; }
+  .footer-txt { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
+  .footer-pixar { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 4px; color: rgba(242,240,235,0.2); transition: color 0.3s; }
+  .footer-pixar:hover { color: rgba(242,240,235,0.4); }
+
+  .scroll-top {
+    position: fixed;
+    bottom: 30px; right: 30px;
+    width: 44px; height: 44px;
+    background: var(--asphalt-light);
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s;
+    z-index: 99;
+    color: var(--muted);
+    font-size: 18px;
+  }
+  .scroll-top.visible { opacity: 1; transform: translateY(0); }
+  .scroll-top:hover { background: var(--red); color: #fff; border-color: var(--red); transform: translateY(-2px); }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    nav.scrolled { padding: 12px 24px; }
+    .nav-links { display: none; }
+    .synopsis, .trailer-section, .characters, .reasons, .cta-section { padding: 64px 24px; }
+    .hero-inner { grid-template-columns: 1fr; padding: 80px 24px 40px; }
+    .hero-visual { display: none; }
+    .meta-bar { padding: 24px; flex-wrap: wrap; gap: 24px; }
+    .synopsis { grid-template-columns: 1fr; gap: 40px; }
+    .char-grid { grid-template-columns: 1fr 1fr; }
+    .reasons { grid-template-columns: 1fr; gap: 40px; }
+    .trailer-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .trailer-note { text-align: left; }
+    footer { flex-direction: column; gap: 8px; padding: 24px; text-align: center; }
+  }
+
+  @media (max-width: 600px) {
+    .char-grid { grid-template-columns: 1fr; }
+    .meta-bar { gap: 16px; }
+    .meta-sep { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="track-line"></div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">🎬 Cineclasic</a>
+  <div class="nav-links">
+    <a href="#sinopsis">Sinopsis</a>
+    <a href="#trailer">Tráiler</a>
+    <a href="#personajes">Personajes</a>
+    <a href="#razones">Razones</a>
+  </div>
+  <span class="nav-tag">Recomendación de Película</span>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-eyebrow">
+        <span class="eyebrow-pill">Pixar · Animación</span>
+        <span class="eyebrow-year">2006</span>
+      </div>
+      <h1 class="hero-title">CA<span class="stroke">RS</span></h1>
+      <p class="hero-subtitle">Velocidad · Amistad · Identidad</p>
+      <p class="hero-desc">
+        Una historia sobre lo que realmente importa cuando la carrera termina. El campeón más veloz de la Pista descubre que la vida es el viaje, no el destino.
+      </p>
+      <div class="hero-actions">
+        <a href="#trailer" class="btn-watch">
+          <span class="play-icon"></span>
+          Ver Tráiler
+        </a>
+        <a href="#sinopsis" class="btn-info">Leer sinopsis</a>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="poster-frame">
+        <img id="img-poster" alt="Póster oficial de Cars — Lightning McQueen #95" class="poster-img" />
+        <div class="rating-badge">
+          <div class="rating-num">8.1</div>
+          <div class="rating-label">IMDb</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="meta-bar">
+    <div class="meta-item"><span class="meta-label">Director</span><span class="meta-value">John Lasseter</span></div>
+    <div class="meta-sep"></div>
+    <div class="meta-item"><span class="meta-label">Duración</span><span class="meta-value">117 min</span></div>
+    <div class="meta-sep"></div>
+    <div class="meta-item"><span class="meta-label">Año</span><span class="meta-value">2006</span></div>
+    <div class="meta-sep"></div>
+    <div class="meta-item"><span class="meta-label">Estudio</span><span class="meta-value">Pixar / Disney</span></div>
+    <div class="meta-sep"></div>
+    <div class="meta-item"><span class="meta-label">Clasificación</span><span class="meta-value">Apta para todos</span></div>
+  </div>
+</section>
+
+<!-- SINOPSIS -->
+<section class="synopsis" id="sinopsis">
+  <div>
+    <div class="section-eyebrow">Sinopsis</div>
+    <h2 class="section-title">La Historia</h2>
+    <p class="synopsis-text">
+      <strong style="color: var(--white);">Lightning McQueen</strong> es un automóvil de carreras arrogante y solitario que sueña con ganar la Copa Pistón. Pero justo antes de la gran final, un accidente lo deja varado en <strong style="color: var(--white);">Radiator Springs</strong>, un pequeño pueblo olvidado en la Ruta 66.
+    </p>
+    <p class="synopsis-text">
+      Obligado a reparar el daño que causó, McQueen conoce a los pintorescos habitantes del lugar: el oxidado Mater, el elegante Doc Hudson, la encantadora Sally y muchos más. Este campeón acostumbrado a la fama descubre que la velocidad no lo es todo.
+    </p>
+    <p class="synopsis-text">
+      <em style="color: rgba(242,240,235,0.5);">Una película sobre redescubrir lo que importa, encontrar comunidad y aprender que el viaje es más valioso que la llegada.</em>
+    </p>
+    <div class="quote-block">
+      <p class="quote-text">"La vida es el viaje, no el destino."</p>
+      <p class="quote-attr">— Doc Hudson, Cars (2006)</p>
+    </div>
+  </div>
+
+  <div class="tech-sheet">
+    <div class="tech-header">Ficha Técnica</div>
+    <div class="tech-row"><span class="tech-key">Título original</span><span class="tech-val">Cars</span></div>
+    <div class="tech-row"><span class="tech-key">Director</span><span class="tech-val">John Lasseter</span></div>
+    <div class="tech-row"><span class="tech-key">Guion</span><span class="tech-val">John Lasseter, Joe Ranft, Jorgen Klubien</span></div>
+    <div class="tech-row"><span class="tech-key">Producción</span><span class="tech-val">Pixar Animation Studios / Walt Disney Pictures</span></div>
+    <div class="tech-row"><span class="tech-key">Música</span><span class="tech-val">Randy Newman</span></div>
+    <div class="tech-row"><span class="tech-key">Estreno</span><span class="tech-val">9 de junio de 2006 (EE. UU.)</span></div>
+    <div class="tech-row">
+      <span class="tech-key">Género</span>
+      <div class="genre-pills">
+        <span class="genre-pill">Animación</span>
+        <span class="genre-pill">Aventura</span>
+        <span class="genre-pill">Comedia</span>
+        <span class="genre-pill">Familia</span>
+      </div>
+    </div>
+    <div class="tech-row"><span class="tech-key">Recaudación</span><span class="tech-val">$461.9 millones USD</span></div>
+    <div class="tech-row"><span class="tech-key">Nominaciones</span><span class="tech-val">Globo de Oro · BAFTA · Saturn Award</span></div>
+  </div>
+</section>
+
+<!-- TRAILER -->
+<section class="trailer-section" id="trailer">
+  <div class="trailer-header">
+    <div>
+      <div class="section-eyebrow">Tráiler Oficial</div>
+      <h2 class="section-title">Míralo Antes</h2>
+    </div>
+    <p class="trailer-note">Tráiler oficial en español de Cars (2006), Pixar Animation Studios.</p>
+  </div>
+  <div class="video-wrapper">
+    <video controls preload="metadata">
+      <source src="trailer.mp4" type="video/mp4">
+      Tu navegador no soporta la reproducción de video.
+    </video>
+  </div>
+  <div class="track-accent"></div>
+</section>
+
+<!-- PERSONAJES -->
+<section class="characters" id="personajes">
+  <div class="section-eyebrow">Personajes Principales</div>
+  <h2 class="section-title">Conoce al Elenco</h2>
+  <div class="char-grid">
+
+    <div class="char-card">
+      <div class="char-img-wrap"><img id="img-mcqueen" alt="Lightning McQueen" /></div>
+      <div class="char-body">
+        <div class="char-name">Lightning McQueen</div>
+        <div class="char-role">Protagonista · #95</div>
+        <div class="char-desc">Un corredor de élite, arrogante pero con corazón. Su paso por Radiator Springs lo cambia para siempre.</div>
+      </div>
+    </div>
+
+    <div class="char-card">
+      <div class="char-img-wrap"><img id="img-mater" alt="Mater" /></div>
+      <div class="char-body">
+        <div class="char-name">Mater</div>
+        <div class="char-role">El mejor amigo</div>
+        <div class="char-desc">Una grúa vieja, sencilla y con un corazón enorme. Demuestra que la lealtad vale más que la velocidad.</div>
+      </div>
+    </div>
+
+    <div class="char-card">
+      <div class="char-img-wrap"><img id="img-doc" alt="Doc Hudson Hornet" /></div>
+      <div class="char-body">
+        <div class="char-name">Doc Hudson</div>
+        <div class="char-role">El mentor misterioso</div>
+        <div class="char-desc">El juez del pueblo esconde un pasado glorioso en las pistas. La figura paterna que McQueen necesitaba.</div>
+      </div>
+    </div>
+
+    <div class="char-card">
+      <div class="char-img-wrap"><img id="img-sally" alt="Sally Carrera" /></div>
+      <div class="char-body">
+        <div class="char-name">Sally Carrera</div>
+        <div class="char-role">El amor · Abogada</div>
+        <div class="char-desc">Un Porsche que dejó la ciudad para encontrarse a sí misma. Muestra a McQueen la belleza del camino lento.</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- RAZONES -->
+<section class="reasons" id="razones">
+  <div>
+    <div class="section-eyebrow">¿Por qué verla?</div>
+    <h2 class="section-title">Razones para No Perdértela</h2>
+    <div class="reason-list">
+      <div class="reason-item">
+        <div class="reason-num">01</div>
+        <div class="reason-content">
+          <div class="reason-title">Una lección de vida disfrazada de carreras</div>
+          <div class="reason-text">Detrás de la velocidad hay un mensaje profundo sobre el éxito, la comunidad y lo que realmente vale la pena en la vida.</div>
+        </div>
+      </div>
+      <div class="reason-item">
+        <div class="reason-num">02</div>
+        <div class="reason-content">
+          <div class="reason-title">Animación que marcó una era</div>
+          <div class="reason-text">En 2006, Pixar redefinió los estándares visuales con reflejos, texturas de asfalto y movimiento de vehículos sin precedentes.</div>
+        </div>
+      </div>
+      <div class="reason-item">
+        <div class="reason-num">03</div>
+        <div class="reason-content">
+          <div class="reason-title">Perfecta para toda la familia</div>
+          <div class="reason-text">Los niños ven una aventura emocionante. Los adultos ven una reflexión sobre el tiempo, la nostalgia y las prioridades.</div>
+        </div>
+      </div>
+      <div class="reason-item">
+        <div class="reason-num">04</div>
+        <div class="reason-content">
+          <div class="reason-title">Banda sonora memorable</div>
+          <div class="reason-text">Randy Newman y una selección de country-rock que captura perfectamente el espíritu de la América rural y la Ruta 66.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scores-block">
+    <div class="scores-title">Puntuaciones de la Crítica</div>
+    <div class="score-row">
+      <div class="score-top"><span class="score-name">IMDb</span><span class="score-val">7.2 / 10</span></div>
+      <div class="score-bar-bg"><div class="score-bar-fill" data-width="72"></div></div>
+    </div>
+    <div class="score-row">
+      <div class="score-top"><span class="score-name">Rotten Tomatoes</span><span class="score-val">74%</span></div>
+      <div class="score-bar-bg"><div class="score-bar-fill yellow" data-width="74"></div></div>
+    </div>
+    <div class="score-row">
+      <div class="score-top"><span class="score-name">Audience Score</span><span class="score-val">66%</span></div>
+      <div class="score-bar-bg"><div class="score-bar-fill blue" data-width="66"></div></div>
+    </div>
+    <div class="score-row">
+      <div class="score-top"><span class="score-name">Metacritic</span><span class="score-val">73 / 100</span></div>
+      <div class="score-bar-bg"><div class="score-bar-fill" data-width="73"></div></div>
+    </div>
+    <div style="margin-top:32px;padding-top:24px;border-top:1px solid var(--line);text-align:center;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:56px;color:var(--yellow);line-height:1;">9.5</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-top:4px;">Recomendación Personal</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-label">¿Listo para el gran premio?</div>
+  <h2 class="cta-title">¡Ka-chow!</h2>
+  <p class="cta-sub">No esperes más para ver esta joya de Pixar. Disponible en Disney+.</p>
+  <a href="https://www.disneyplus.com" target="_blank" class="cta-btn">Ver en Disney+</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-txt">Página de recomendación · Creada con fines educativos</div>
+  <div class="footer-pixar">PIXAR · DISNEY · 2006</div>
+</footer>
+
+<div class="track-line"></div>
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+  // ─── Asignar imágenes desde imagenes.js ───────────────────────────────────
+  document.getElementById('img-poster').src  = IMGS.poster;
+  document.getElementById('img-mcqueen').src = IMGS.mcqueen;
+  document.getElementById('img-mater').src   = IMGS.mater;
+  document.getElementById('img-doc').src     = IMGS.doc;
+  document.getElementById('img-sally').src   = IMGS.sally;
+
+  // ─── Navbar scroll ────────────────────────────────────────────────────────
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 50));
+
+  // ─── Scroll to top ────────────────────────────────────────────────────────
+  const scrollTopBtn = document.getElementById('scrollTop');
+  window.addEventListener('scroll', () => scrollTopBtn.classList.toggle('visible', window.scrollY > 500));
+
+  // ─── Animaciones al hacer scroll ─────────────────────────────────────────
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      if (entry.target.classList.contains('score-bar-fill'))
+        entry.target.style.width = entry.target.getAttribute('data-width') + '%';
+      if (entry.target.classList.contains('synopsis-text'))
+        entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+  document.querySelectorAll('.score-bar-fill, .synopsis-text').forEach(el => observer.observe(el));
+
+  // ─── Smooth scroll nav ───────────────────────────────────────────────────
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+</script>
+
+</body>
+</html>
