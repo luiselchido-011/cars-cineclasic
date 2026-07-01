@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 145 32% 17%;
+    --foreground: 95 32% 85%;
+    --card: 145 32% 9%;
+    --card-foreground: 95 32% 85%;
+    --popover: 145 32% 12%;
+    --popover-foreground: 95 32% 85%;
+    --primary: 40 55% 50%;
+    --primary-foreground: 145 32% 9%;
+    --secondary: 145 25% 40%;
+    --secondary-foreground: 95 32% 95%;
+    --muted: 145 25% 22%;
+    --muted-foreground: 95 25% 60%;
+    --accent: 40 55% 50%;
+    --accent-foreground: 145 32% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 145 25% 30%;
+    --input: 145 25% 25%;
+    --ring: 40 55% 50%;
+    --radius: 0.5rem;
+    --font-display: 'Cormorant Garamond', serif;
+    --font-body: 'Inter', sans-serif;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    font-family: var(--font-body);
+    background-color: #1e3a29;
+    color: #d8e8c8;
+    overflow-x: hidden;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  .font-display {
+    font-family: var(--font-display);
+  }
+  .font-body {
+    font-family: var(--font-body);
+  }
+  .label-tag {
+    font-family: var(--font-display);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #c8963e;
+  }
+  .label-tag::before {
+    content: '';
+    display: inline-block;
+    width: 40px;
+    height: 1px;
+    background-color: #c8963e;
+    margin-right: 12px;
+    vertical-align: middle;
+  }
+}
+
+@layer utilities {
+  .text-shadow-hero {
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+  }
+  .bg-forest-dark {
+    background-color: #0d1a12;
+  }
+  .bg-forest-main {
+    background-color: #1e3a29;
+  }
+  .text-amber-accent {
+    color: #c8963e;
+  }
+  .text-green-light {
+    color: #d8e8c8;
+  }
+  .text-green-medium {
+    color: #a8c896;
+  }
+  .border-green-subtle {
+    border-color: rgba(74, 124, 89, 0.3);
+  }
+}
